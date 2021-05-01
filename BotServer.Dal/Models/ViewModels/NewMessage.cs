@@ -67,12 +67,12 @@ namespace BotServer.Dal.Models.ViewModels
         /// <summary>
         /// Point in time (Unix timestamp) when the message was sent
         /// </summary>
-        public int Date { get; set; }
+        public long Date { get; set; }
 
         /// <summary>
         /// Point in time (Unix timestamp) when the message was last edited
         /// </summary>
-        public int EditDate { get; set; }
+        public long EditDate { get; set; }
 
 
         /// <summary>

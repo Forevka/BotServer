@@ -35,7 +35,7 @@ namespace BotServer.Bll
             return await _client.Client.ExecuteAsync(new TdApi.GetMe());
         }
 
-        public IEnumerable<object> GetUpdates(UpdateTypeEnum updateTypeEnum, long updateOffset)
+        public IEnumerable<BaseUpdate> GetUpdates(UpdateTypeEnum updateTypeEnum, long updateOffset)
         {
             IEnumerable<KeyValuePair<long, TdApi.Update>> updateStream;
             if (updateOffset < 0)

@@ -1,6 +1,9 @@
+using System.IO;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
+using System.Text.Unicode;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace BotServer.Bll
 {
@@ -20,7 +23,11 @@ namespace BotServer.Bll
             {
                 baseBotClient = BaseBotClient.FromToken(token);
 
-                if (pool.IsCached(baseBotClient))
+                var isCached = pool.IsCached(baseBotClient);
+
+                context.Response.Headers.Add("X-IS-FIRST-TIME", isCached.ToString());
+
+                if (isCached)
                 {
                     baseBotClient = pool.GetCached(baseBotClient);
                 }
@@ -31,6 +38,14 @@ namespace BotServer.Bll
                 }
 
                 botClient.SetBaseClient(baseBotClient);
+            }
+            else
+            {
+                if (!context.Request.Path.Value.Contains("swagger"))
+                {
+                    context.Response.StatusCode = 401;
+                    return;
+                }
             }
 
             await _next(context);

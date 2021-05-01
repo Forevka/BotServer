@@ -6,6 +6,10 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using BotServer.Dal.Enums;
+using BotServer.Dal.ExampleProviders;
+using BotServer.Dal.Models;
+using BotServer.Dal.Models.ViewModels;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace BotServer.WebApi.Controllers
 {
@@ -23,12 +27,13 @@ namespace BotServer.WebApi.Controllers
         }
 
         [HttpGet]
-        public List<object> Updates([Required][FromQuery(Name = "UpdateType")]UpdateTypeEnum updateTypeEnum, [Required]long updateOffset)
+        [ProducesResponseType(typeof(List<NewMessage>), 200)]
+        public List<BaseUpdate> Updates([Required][FromQuery(Name = "UpdateType")]UpdateTypeEnum updateTypeEnum, [Required]long updateOffset)
         {
             if (Enum.IsDefined(typeof(UpdateTypeEnum), updateTypeEnum))
                 return _botClient.GetUpdates(updateTypeEnum, updateOffset).ToList();
 
-            return new List<object>();
+            return new List<BaseUpdate>();
         }
     }
 }
