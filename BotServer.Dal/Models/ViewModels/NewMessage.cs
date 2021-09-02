@@ -124,5 +124,7 @@ namespace BotServer.Dal.Models.ViewModels
         /// Content of the message
         /// </summary>
         public BaseContent Content { get; set; }
+
+        public UserFullInfoViewModel From { get; set; }
     }
 }

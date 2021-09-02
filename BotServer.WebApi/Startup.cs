@@ -1,4 +1,6 @@
+using AutoMapper;
 using BotServer.Bll;
+using BotServer.Dal.Mapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -19,9 +21,16 @@ namespace BotServer.WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            var mapperConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new DefaultMapProfile());
+            });
 
-            // Register the Swagger generator, defining 1 or more Swagger documents
+            IMapper mapper = mapperConfig.CreateMapper();
+            services.AddSingleton(mapper);
+
+            services.AddControllers().AddNewtonsoftJson();
+
             services.AddSwaggerGen();
 
 

@@ -1,14 +1,20 @@
 ﻿using BotServer.Dal.Models.ViewModels;
 using BotServer.Dal.Models.ViewModels.MessageContent;
 using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
 using BotServer.Dal.Models;
 using TdLib;
 
 namespace BotServer.Bll.UpdateResolver
 {
-    public class NewMessageResolver : IUpdateResolver<NewMessage, TdApi.Update.UpdateNewMessage>, IUpdateResolver<BaseUpdate, TdApi.Update>
+    public class NewMessageResolver : BaseUpdateResolver, IUpdateResolver<NewMessage, TdApi.Update.UpdateNewMessage>, IUpdateResolver<BaseUpdate, TdApi.Update>
     {
-        public NewMessage Resolve(TdApi.Update.UpdateNewMessage updateObject)
+        public NewMessageResolver(BotClient bot, IMapper mapper) : base(bot, mapper)
+        {
+        }
+
+        public async Task<NewMessage> Resolve(TdApi.Update.UpdateNewMessage updateObject)
         {
             var entity = new NewMessage
             {
@@ -33,7 +39,10 @@ namespace BotServer.Bll.UpdateResolver
                 ReplyToMessageId = updateObject.Message.ReplyToMessageId,
                 RestrictionReason = updateObject.Message.RestrictionReason,
                 ViaBotUserId = updateObject.Message.ViaBotUserId,
+                From = Mapper.Map<UserFullInfoViewModel>(await Bot.GetUser((int)updateObject.Message.ChatId)),
             };
+
+            var a = await Bot.GetUser2((int)updateObject.Message.ChatId);
 
             if (updateObject.Message.Content is TdApi.MessageContent.MessageText text)
             {
@@ -53,9 +62,9 @@ namespace BotServer.Bll.UpdateResolver
             return entity;
         }
 
-        public BaseUpdate Resolve(TdApi.Update updateObject)
+        public async Task<BaseUpdate> Resolve(TdApi.Update updateObject)
         {
-            return Resolve((TdApi.Update.UpdateNewMessage)updateObject);
+            return await Resolve((TdApi.Update.UpdateNewMessage)updateObject);
         }
     }
 }

@@ -1,15 +1,14 @@
 using BotServer.Bll;
+using BotServer.Dal.Enums;
+using BotServer.Dal.Models;
+using BotServer.Dal.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using BotServer.Dal.Enums;
-using BotServer.Dal.ExampleProviders;
-using BotServer.Dal.Models;
-using BotServer.Dal.Models.ViewModels;
-using Swashbuckle.AspNetCore.Filters;
+using System.Threading.Tasks;
 
 namespace BotServer.WebApi.Controllers
 {
@@ -28,12 +27,13 @@ namespace BotServer.WebApi.Controllers
 
         [HttpGet]
         [ProducesResponseType(typeof(List<NewMessage>), 200)]
-        public List<BaseUpdate> Updates([Required][FromQuery(Name = "UpdateType")]UpdateTypeEnum updateTypeEnum, [Required]long updateOffset)
+        public async Task<List<BaseUpdate>> Updates([Required][FromQuery(Name = "UpdateType")]UpdateTypeEnum updateTypeEnum, [Required]long updateOffset)
         {
-            if (Enum.IsDefined(typeof(UpdateTypeEnum), updateTypeEnum))
-                return _botClient.GetUpdates(updateTypeEnum, updateOffset).ToList();
+            if (!Enum.IsDefined(typeof(UpdateTypeEnum), updateTypeEnum)) 
+                return new List<BaseUpdate>();
 
-            return new List<BaseUpdate>();
+            var updates = await _botClient.GetUpdates(updateTypeEnum, updateOffset);
+            return updates.ToList();
         }
     }
 }

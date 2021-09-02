@@ -1,9 +1,6 @@
-using System.IO;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
-using System.Text.Unicode;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.WebUtilities;
 
 namespace BotServer.Bll
 {
@@ -16,6 +13,7 @@ namespace BotServer.Bll
             _next = next;
         }
 
+        // ReSharper disable once RedundantAssignment
         public async Task Invoke(HttpContext context, BotPool pool, BaseBotClient baseBotClient, BotClient botClient)
         {
             var token = context.Request.Headers.FirstOrDefault(x => x.Key == "Token").Value.ToString();

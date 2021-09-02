@@ -5,21 +5,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using TdLib;
 
 namespace BotServer.Bll
 {
     public class BotClient
     {
+        private readonly IMapper _mapper;
         private BaseBotClient _client;
 
         private readonly Dictionary<UpdateTypeEnum, IUpdateResolver<BaseUpdate, TdApi.Update>> _updateResolvers;
 
-        public BotClient()
+        public BotClient(IMapper mapper)
         {
+            _mapper = mapper;
             _updateResolvers = new Dictionary<UpdateTypeEnum, IUpdateResolver<BaseUpdate, TdApi.Update>>
             {
-                {UpdateTypeEnum.NewMessage, new NewMessageResolver()}
+                {UpdateTypeEnum.NewMessage, new NewMessageResolver(this, _mapper)}
             };
         }
 
@@ -35,7 +38,16 @@ namespace BotServer.Bll
             return await _client.Client.ExecuteAsync(new TdApi.GetMe());
         }
 
-        public IEnumerable<BaseUpdate> GetUpdates(UpdateTypeEnum updateTypeEnum, long updateOffset)
+        public async Task<TdApi.UserFullInfo> GetUser(int userId)
+        {
+            return await _client.Client.ExecuteAsync(new TdApi.GetUserFullInfo() {UserId = userId});
+        }
+        public async Task<TdApi.User> GetUser2(int userId)
+        {
+            return await _client.Client.ExecuteAsync(new TdApi.GetUser() { UserId = userId });
+        }
+
+        public async Task<IEnumerable<BaseUpdate>> GetUpdates(UpdateTypeEnum updateTypeEnum, long updateOffset)
         {
             IEnumerable<KeyValuePair<long, TdApi.Update>> updateStream;
             if (updateOffset < 0)
@@ -43,13 +55,16 @@ namespace BotServer.Bll
             else
                 updateStream = _client.Updates[updateTypeEnum].Where(x => x.Key >= updateOffset);
 
+            var updates = new List<BaseUpdate>();
             foreach (var (id, update) in updateStream)   
             {
-                var resolved = _updateResolvers[updateTypeEnum].Resolve(update);
+                var resolved = await _updateResolvers[updateTypeEnum].Resolve(update);
                 resolved.UpdateId = id;
 
-                yield return resolved;
+                updates.Add(resolved);
             }
+
+            return updates;
         }
     }
 }

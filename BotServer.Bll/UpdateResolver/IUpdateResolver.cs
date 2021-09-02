@@ -1,7 +1,9 @@
-﻿namespace BotServer.Bll.UpdateResolver
+﻿using System.Threading.Tasks;
+
+namespace BotServer.Bll.UpdateResolver
 {
-    public interface IUpdateResolver<out TOut, in TUpdate>
+    public interface IUpdateResolver<TOut, in TUpdate>
     {
-        TOut Resolve(TUpdate updateObject);
+        Task<TOut> Resolve(TUpdate updateObject);
     }
 }
